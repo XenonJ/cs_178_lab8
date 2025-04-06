@@ -108,39 +108,107 @@ const Visualization = (function () {
           d3.forceCenter(dimensions.width / 2, dimensions.height / 2)
         );
 
-      // Create links
-      const link = g
-        .append("g")
-        .attr("class", "links")
-        .selectAll("line")
+      var settings = ConfigPanel.getSettings()
+
+      // Create a group for links
+      const linkGroup = g.append("g").attr("class", "links");
+
+      // Create groups for each link
+      const link = linkGroup
+        .selectAll(".links")
         .data(data.links)
         .enter()
-        .append("line")
+        .append("g")
+        .attr("class", "links");
+
+      // Append a line for each link
+      link.append("line")
         .attr("stroke", "#999")
         .attr("stroke-opacity", 0.6)
         .attr("stroke-width", 1);
 
-      // Create nodes - all grey
+      // Append a text element for the link label
+      if (settings.visualOptions.showRelationships) {
+        link.append("text")
+          .text(d => d.type)
+          .attr("class", "link-type")
+          .attr("font-size", "10px")
+          .attr("fill", "black");
+      }
+
+      var nodeSize = 0;
+      switch (settings.visualOptions.nodeSize) {
+        case "small":
+          nodeSize = 5;
+          break;
+        case "medium":
+          nodeSize = 10;
+          break;
+        case "large":
+          nodeSize = 15;
+          break;
+        default:
+          nodeSize = 5;
+          break;
+      }
+
+      // Create a group for each node and apply dragging behavior
       const node = g
-        .append("g")
-        .attr("class", "nodes")
-        .selectAll("circle")
+        .selectAll(".node")
         .data(data.nodes)
         .enter()
-        .append("circle")
-        .attr("r", 5)
-        .attr("fill", "#888") // All nodes are grey
+        .append("g")
+        .attr("class", "node")
         .call(drag(simulation));
 
-      // Update positions on tick
-      simulation.on("tick", () => {
-        link
-          .attr("x1", (d) => d.source.x || 0)
-          .attr("y1", (d) => d.source.y || 0)
-          .attr("x2", (d) => d.target.x || 0)
-          .attr("y2", (d) => d.target.y || 0);
+      // Append circle to each group
+      node
+        .append("circle")
+        .attr("r", nodeSize)
+        .attr("fill", d => {
+          if (d.labels == "Movie") {
+            return "blue";
+          }
+          else {
+            return "green";
+          }
+        });
 
-        node.attr("cx", (d) => d.x || 0).attr("cy", (d) => d.y || 0);
+      // Append text to each group for labels
+      if (settings.visualOptions.showLabels) {
+        node
+          .append("text")
+          .text(d => {
+            if (d.labels == "Movie") {
+              return d.properties.title;
+            }
+            else {
+              return d.id;
+            }
+          }) // Use the property from your data that contains the label
+          .attr("class", "node-label")
+          // Position the text relative to the circle; adjust the x/y offsets as needed
+          .attr("x", nodeSize + 2)
+          .attr("y", 3)
+          .attr("font-size", "10px")
+          .attr("fill", "black");
+      }
+
+      // Update positions on each simulation tick
+      simulation.on("tick", () => {
+        // Update node group position
+        node.attr("transform", d => `translate(${d.x || 0}, ${d.y || 0})`);
+
+        // Update link positions
+        link.select("line")
+          .attr("x1", d => d.source.x || 0)
+          .attr("y1", d => d.source.y || 0)
+          .attr("x2", d => d.target.x || 0)
+          .attr("y2", d => d.target.y || 0);
+
+        link.select("text")
+          .attr("x", d => (d.source.x + d.target.x) / 2)
+          .attr("y", d => (d.source.y + d.target.y) / 2);
       });
 
       console.log("Visualization rendered successfully");

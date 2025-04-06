@@ -27,11 +27,13 @@ def serve_static(path):
 def get_graph_data():
     try:
         print("Received request data")
+        request_data = request.get_json()
+        print(request_data)
 
-        # TODO: Extract parameters from incoming request
-        year = 2010
-        operator = '>'
-        limit = 100
+        # Extract parameters from incoming request
+        year = request_data['year']
+        operator = request_data['operator']
+        limit = request_data['limit']
         
         if year is not None and operator is not None:
             query = construct_query(year, operator, limit)
