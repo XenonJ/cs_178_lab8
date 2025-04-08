@@ -239,7 +239,7 @@ const Visualization = (function () {
       .attr("rx", 12)
       .attr("ry", 12)
       .attr("width", 240)
-      .attr("height", 120) // temporary, we'll resize later
+      .attr("height", 120)
       .style("fill", "white")
       .style("fill-opacity", 0.85)
       .style("stroke", "url(#border-gradient)")
@@ -325,9 +325,6 @@ const Visualization = (function () {
 
     // --- Resize background based on final content ---
     background.attr("height", yOffset + 10);
-
-
-
   }
 
   // Drag handler for nodes
