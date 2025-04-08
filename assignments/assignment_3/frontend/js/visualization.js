@@ -215,6 +215,45 @@ const Visualization = (function () {
     } catch (error) {
       console.error("Error rendering visualization:", error);
     }
+
+    // Add a legend
+    const legendData = [
+      { label: "Movie", color: "blue" },
+      { label: "Person", color: "green" },
+      { label: "Relationship Type: Rating", color: "#999", isEdge: true }
+    ];
+
+    const legend = svg.append("g")
+      .attr("class", "legend")
+      .attr("transform", `translate(20, 20)`);
+
+    legendData.forEach((item, i) => {
+      const g = legend.append("g").attr("transform", `translate(0, ${i * 20})`);
+      
+      if (item.isEdge) {
+        g.append("line")
+          .attr("x1", 0)
+          .attr("y1", 7)
+          .attr("x2", 20)
+          .attr("y2", 7)
+          .attr("stroke", item.color)
+          .attr("stroke-width", 2);
+      } else {
+        g.append("circle")
+          .attr("r", 5)
+          .attr("fill", item.color)
+          .attr("cx", 10)
+          .attr("cy", 7);
+      }
+
+      g.append("text")
+        .attr("x", 30)
+        .attr("y", 10)
+        .attr("font-size", "12px")
+        .attr("fill", "black")
+        .text(item.label);
+      });
+
   }
 
   // Drag handler for nodes
