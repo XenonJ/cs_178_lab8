@@ -216,43 +216,117 @@ const Visualization = (function () {
       console.error("Error rendering visualization:", error);
     }
 
-    // Add a legend
-    const legendData = [
-      { label: "Movie", color: "blue" },
-      { label: "Person", color: "green" },
-      { label: "Relationship Type: Rating", color: "#999", isEdge: true }
-    ];
+    // --- Define the legend data ---
+    const legendData = {
+      nodes: [
+        { label: "Movie", color: "blue" },
+        { label: "Person", color: "green" }
+      ],
+      edges: [
+        { label: "Rating", color: "#999" }
+      ]
+    };
 
+    // --- Create a group for the legend ---
     const legend = svg.append("g")
       .attr("class", "legend")
-      .attr("transform", `translate(20, 20)`);
+      .attr("transform", "translate(20, 20)");
 
-    legendData.forEach((item, i) => {
-      const g = legend.append("g").attr("transform", `translate(0, ${i * 20})`);
-      
-      if (item.isEdge) {
-        g.append("line")
-          .attr("x1", 0)
-          .attr("y1", 7)
-          .attr("x2", 20)
-          .attr("y2", 7)
-          .attr("stroke", item.color)
-          .attr("stroke-width", 2);
-      } else {
-        g.append("circle")
-          .attr("r", 5)
-          .attr("fill", item.color)
-          .attr("cx", 10)
-          .attr("cy", 7);
-      }
+    // --- Background box (white, transparent, 3D effect via gradient border) ---
+    const background = legend.append("rect")
+      .attr("x", 0)
+      .attr("y", 0)
+      .attr("rx", 12)
+      .attr("ry", 12)
+      .attr("width", 240)
+      .attr("height", 120) // temporary, we'll resize later
+      .style("fill", "white")
+      .style("fill-opacity", 0.85)
+      .style("stroke", "url(#border-gradient)")
+      .style("stroke-width", 1.5);
 
-      g.append("text")
+    // --- Create a 3D-style border gradient ---
+    const defs = svg.append("defs");
+    const gradient = defs.append("linearGradient")
+      .attr("id", "border-gradient")
+      .attr("x1", "0%").attr("y1", "0%")
+      .attr("x2", "100%").attr("y2", "100%");
+
+    gradient.append("stop")
+      .attr("offset", "0%")
+      .attr("stop-color", "#ccc");
+
+    gradient.append("stop")
+      .attr("offset", "100%")
+      .attr("stop-color", "#999");
+
+    // --- Add Node Types Title ---
+    legend.append("text")
+      .attr("x", 15)
+      .attr("y", 25)
+      .text("Node Types")
+      .style("font-weight", "bold")
+      .style("font-size", "13px");
+
+    let yOffset = 45;
+
+    // --- Draw nodes in legend ---
+    legendData.nodes.forEach((item) => {
+      const group = legend.append("g")
+        .attr("transform", `translate(15, ${yOffset})`);
+
+      group.append("circle")
+        .attr("r", 6)
+        .attr("cx", 0)
+        .attr("cy", 0)
+        .attr("fill", item.color);
+
+      group.append("text")
+        .attr("x", 20)
+        .attr("y", 4)
+        .text(item.label)
+        .style("font-size", "12px");
+
+      yOffset += 20;
+    });
+
+    // --- Relationship Types Title ---
+    yOffset += 10;
+    legend.append("text")
+      .attr("x", 15)
+      .attr("y", yOffset)
+      .text("Relationship Types")
+      .style("font-weight", "bold")
+      .style("font-size", "13px");
+
+    yOffset += 20;
+
+    // --- Draw edges in legend ---
+    legendData.edges.forEach((item) => {
+      const group = legend.append("g")
+        .attr("transform", `translate(15, ${yOffset})`);
+
+      group.append("line")
+        .attr("x1", 0)
+        .attr("y1", 0)
+        .attr("x2", 20)
+        .attr("y2", 0)
+        .attr("stroke", item.color)
+        .attr("stroke-width", 2);
+
+      group.append("text")
         .attr("x", 30)
-        .attr("y", 10)
-        .attr("font-size", "12px")
-        .attr("fill", "black")
-        .text(item.label);
-      });
+        .attr("y", 5)
+        .text(item.label)
+        .style("font-size", "12px");
+
+      yOffset += 20;
+    });
+
+    // --- Resize background based on final content ---
+    background.attr("height", yOffset + 10);
+
+
 
   }
 

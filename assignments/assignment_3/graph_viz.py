@@ -83,4 +83,8 @@ def construct_query(year=None, operator='>', limit=100):
     """
     Copy the parameterized query function from the previous part and make it work here
     """
-    return f'MATCH (e)-[r]-(m:Movie) WHERE m.year {operator} {year} RETURN e, r, m LIMIT {limit}'
+    return f'''MATCH (m:Movie)
+            WHERE m.year {operator} {year}  // or any condition for selecting movies
+            OPTIONAL MATCH (u:User)-[r]->(m)
+            RETURN u, r, m
+            LIMIT {limit}'''
